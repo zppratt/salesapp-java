@@ -3,7 +3,7 @@ import java.sql.*;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!");
-        Customer customer1 = new Customer("Alice", "Onion");
+        Customer customer1 = new Customer(1, "Alice", "Onion");
         System.out.println(customer1);
 
         // JDBC URL, username, and password of PostgreSQL server
