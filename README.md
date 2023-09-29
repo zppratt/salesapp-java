@@ -1,6 +1,6 @@
 # Customer Database App
 
-This Java application demonstrates basic CRUD operations (Create, Read, Update, Delete) on a `Customer` entity in a PostgreSQL database. The application uses JDBC for database connectivity.
+This Java application demonstrates basic CRUD operations (Create, Read, Update, Delete) on a `Customer` entity in a PostgreSQL database. The application uses JDBC for database connectivity, Spark Java for building RESTful APIs, and GSON for JSON serialization.
 
 ## Setup
 
@@ -47,12 +47,24 @@ This Java application demonstrates basic CRUD operations (Create, Read, Update, 
 3. Compile and run the application:
 
     ```bash
-    javac -cp .;path/to/your/postgresql-driver.jar MainProgram.java
-    java -cp .;path/to/your/postgresql-driver.jar MainProgram
-    ```
-
-   If you are using Maven:
-
-    ```bash
     mvn compile
     mvn exec:java
+    ```
+
+4. The Spark API will start at `http://localhost:4567`.
+
+### API Endpoints
+
+- **GET /customers**: Retrieve all customers.
+- **GET /customers/:id**: Retrieve a specific customer by ID.
+- **POST /customers**: Create a new customer.
+- **PUT /customers/:id**: Update an existing customer by ID.
+- **DELETE /customers/:id**: Delete a customer by ID.
+
+## Contributing
+
+Contributions are welcome! Please follow the [Contribution Guidelines](CONTRIBUTING.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
