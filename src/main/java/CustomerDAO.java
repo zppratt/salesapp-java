@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class CustomerDAO {
     private Connection connection;
@@ -11,14 +8,23 @@ public class CustomerDAO {
     }
 
     public void saveCustomer(Customer customer) {
-        String sql = "INSERT INTO customer (id, first_name, last_name) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO customer (first_name, last_name) VALUES (?, ?)";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, customer.getId());
-            preparedStatement.setString(2, customer.getFirstName());
-            preparedStatement.setString(3, customer.getLastName());
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, customer.getFirstName());
+            preparedStatement.setString(2, customer.getLastName());
 
-            preparedStatement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows > 0) {
+                // Retrieve the generated ID
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int generatedId = generatedKeys.getInt(1);
+                        customer.setId(generatedId); // Set the generated ID in the customer object
+                    }
+                }
+            }
 
             System.out.println("Customer saved to the database.");
         } catch (SQLException e) {
@@ -37,7 +43,11 @@ public class CustomerDAO {
                     String firstName = resultSet.getString("first_name");
                     String lastName = resultSet.getString("last_name");
 
-                    return new Customer(id, firstName, lastName);
+                    // Set the retrieved ID in the Customer object
+                    Customer customer = new Customer(firstName, lastName);
+                    customer.setId(id);
+
+                    return customer;
                 }
             }
         } catch (SQLException e) {

@@ -7,6 +7,8 @@ import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println("Current Working Directory: " + System.getProperty("user.dir"));
+
         Properties properties = loadProperties("secrets.properties");
 
         if (properties != null) {
@@ -16,7 +18,7 @@ public class Main {
             String dbPassword = properties.getProperty("db.password");
 
             // Create a Customer model object
-            Customer customer = new Customer(1, "John", "Doe");
+            Customer customer = new Customer("John", "Doe");
 
             // Establish a database connection
             try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
