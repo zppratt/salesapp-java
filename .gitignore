@@ -1,0 +1,31 @@
+# .gitignore
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+
+# IntelliJ IDEA
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven
+log/
+target/
+
+# Gradle
+.gradle/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Custom exclusions
+secrets.properties

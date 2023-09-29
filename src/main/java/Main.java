@@ -1,38 +1,52 @@
-import java.sql.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
-        Customer customer1 = new Customer(1, "Alice", "Onion");
-        System.out.println(customer1);
+        Properties properties = loadProperties("secrets.properties");
 
-        // JDBC URL, username, and password of PostgreSQL server
-        String url = "jdbc:postgresql://localhost:5432/salesapp";
-        String user = "postgres";
-        String password = "secret";
+        if (properties != null) {
+            // Read database connection properties
+            String dbUrl = properties.getProperty("db.url");
+            String dbUser = properties.getProperty("db.user");
+            String dbPassword = properties.getProperty("db.password");
 
-        // Establish a connection
-        try (Connection connection = DriverManager.getConnection(url, user, password)) {
-            System.out.println("Connected to the PostgreSQL server successfully.");
-            // Create a Statement
-            try (Statement statement = connection.createStatement()) {
-                // Execute a SELECT query
-                String sql = "SELECT * FROM customer";
-                try (ResultSet resultSet = statement.executeQuery(sql)) {
-                    // Process the result set
-                    while (resultSet.next()) {
-                        // Retrieve data from the result set
-                        int id = resultSet.getInt("id");
-                        String firstName = resultSet.getString("first_name");
-                        String lastName = resultSet.getString("last_name");
+            // Create a Customer model object
+            Customer customer = new Customer(1, "John", "Doe");
 
-                        // Print the data
-                        System.out.println("ID: " + id + ", First Name: " + firstName + ", Last Name: " + lastName);
-                    }
-                }
+            // Establish a database connection
+            try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+
+                // Create a CustomerDAO and pass the connection
+                CustomerDAO customerDAO = new CustomerDAO(connection);
+
+                // Save the customer to the database
+                customerDAO.saveCustomer(customer);
+
+                // Retrieve the customer from the database by ID
+                Customer retrievedCustomer = customerDAO.getCustomerById(1);
+
+                // Print the retrieved customer details
+                System.out.println("Retrieved Customer: " + retrievedCustomer);
+
+            } catch (SQLException e) {
+                System.err.println("Database connection error: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.println("Connection error: " + e.getMessage());
+        }
+    }
+
+    private static Properties loadProperties(String fileName) {
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream(fileName)) {
+            properties.load(input);
+            return properties;
+        } catch (IOException e) {
+            System.err.println("Error loading properties file: " + e.getMessage());
+            return null;
         }
     }
 }
