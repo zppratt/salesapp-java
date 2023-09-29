@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import org.eclipse.jetty.util.log.Log;
 import spark.Spark;
 
 import java.io.FileInputStream;
@@ -29,26 +30,31 @@ public class Main {
                 // Create a CustomerDAO and pass the connection
                 CustomerDAO customerDAO = new CustomerDAO(connection);
 
-                // Initialize Spark
-                Spark.port(4567);
-
-                // Define API endpoints
-                setupEndpoints(customerDAO);
-
-                // Wait for Spark to stop before closing the connection
-                Spark.awaitStop();
+                new Thread(() -> {
+                    Spark.port(4567);
+                    setupEndpoints(customerDAO);
+                    Spark.awaitInitialization();
+                    // Wait for user input to stop Spark (you can replace this with your own logic)
+                    System.out.println("Press Enter to stop Spark...");
+                    try {
+                        System.in.read();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // Manually close the connection when Spark is stopped
+                    if (customerDAO.getConnection() != null) {
+                        try {
+                            System.out.println("Closing DB connection...");
+                            customerDAO.getConnection().close();
+                            Spark.stop();
+                        } catch (SQLException e) {
+                            System.err.println("Error closing database connection: " + e.getMessage());
+                        }
+                    }
+                }).start();
 
             } catch (SQLException e) {
                 System.err.println("Database connection error: " + e.getMessage());
-            } finally {
-                // Manually close the connection when Spark is stopped
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        System.err.println("Error closing database connection: " + e.getMessage());
-                    }
-                }
             }
         }
     }
@@ -117,6 +123,13 @@ public class Main {
                 response.status(404);
                 return "Customer not found";
             }
+        });
+
+        Spark.exception(Exception.class, (exception, request, response) -> {
+            exception.printStackTrace();
+            // Log the exception or take appropriate action
+            response.status(500);
+            response.body("Internal Server Error");
         });
     }
 }

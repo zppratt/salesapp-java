@@ -9,6 +9,10 @@ public class CustomerDAO {
         this.connection = connection;
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
+
     public void saveCustomer(Customer customer) {
         String sql = "INSERT INTO customer (first_name, last_name) VALUES (?, ?)";
 
